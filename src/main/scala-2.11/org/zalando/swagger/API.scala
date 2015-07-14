@@ -13,19 +13,36 @@ case class Swagger(
   consumes: List[String],
   produces: List[String],
   paths: Map[String, Path],
-  definitions: Map[String, Definition]
+  security: List[Map[String,List[String]]],
+  definitions: Map[String, Definition],
+  securityDefinitions: Map[String, SecurityDefinition]
 ) extends API
 
 case class Info(
   title: String, 
   description: String, 
-  version: String
+  version: String,
+  termsOfService: String,
+  contact: Contact,
+  license: License
+) extends API
+
+case class Contact(
+  name: String,
+  email: String,
+  url: String
+  ) extends API
+
+case class License(
+  name: String,
+  url: String
 ) extends API
 
 case class Path(
   get: Operation,
   post: Operation,
   put: Operation,
+  delete: Operation,
   parameters: List[Parameter]
 ) extends API
 
@@ -36,12 +53,16 @@ case class Operation(
   summary: String, 
   operationId: String, 
   extensions: Map[String, String], 
-  responses: Map[String, Response]
+  responses: Map[String, Response],
+  produces: List[String],
+  consumes: List[String],
+  security: List[Map[String,List[String]]]
 ) extends API
 
 case class Parameter(
-  name: String, 
-  @JsonProperty("type") kind: String, 
+  name: String,
+  @JsonProperty("type") kind: String,
+  @JsonProperty("$ref") ref: String,
   schema: Schema,
   format: String, 
   description: String, 
@@ -50,7 +71,9 @@ case class Parameter(
   required: Boolean,
   default: String,
   minimum: String,
-  maximum: String
+  maximum: String,
+  items: Items,
+  collectionFormat: String
 ) extends API
 
 case class Response(
@@ -67,7 +90,9 @@ case class Schema(
   format: String, 
   description: String, 
   required: List[String], 
-  items: Items
+  items: Items,
+  properties: Map[String,Property],
+  enum: List[String]
 ) extends API
 
 case class Header(
@@ -80,17 +105,33 @@ case class Header(
 case class Items(
   typename: String, 
   format: String, 
-  items: Items, 
-  @JsonProperty("$ref") ref: String
+  items: Items,
+  @JsonProperty("$ref") ref: String,
+  @JsonProperty("type") kind: String
 ) extends API
 
 case class Definition(
-  properties: Map[String, Property]
+  properties: Map[String, Property],
+  required: List[String]
 ) extends API
 
 case class Property(
   @JsonProperty("type") kind: String,
+  @JsonProperty("$ref") ref: String,
   description: String,
   format: String, 
-  items: Items
+  items: Items,
+  example: String,
+  properties: Map[String,Property]
+) extends API
+
+case class SecurityDefinition(
+  @JsonProperty("type") kind: String,
+  name: String,
+  description: String,
+  in: String,
+  authorizationUrl: String,
+  flow: String,
+  scopes: Map[String,String],
+  tokenUrl: String
 ) extends API
