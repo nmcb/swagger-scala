@@ -11,14 +11,22 @@ class ParserTest extends FlatSpec with Matchers {
 
   val fixtures = Seq(
     new File("src/test/resources/uber.api.json"),
-    new File("src/test/resources/uber.api.yaml")
+    new File("src/test/resources/uber.api.yaml"),
+    new File("src/test/resources/minimal.api.yaml"),
+    new File("src/test/resources/minimal.api.json"),
+    new File("src/test/resources/heroku.petstore.api.yaml"),
+    new File("src/test/resources/heroku.petstore.api.json")
   )
 
-  "The json swagger parser" should "read swagger json specifications" in {
-    fixtures.filter(_.getName.endsWith(".json")).map(JsonParser.parse)
+  fixtures.filter(_.getName.endsWith(".json")).foreach { file =>
+    "The json swagger parser" should s"read the ${file.getName} specification" in {
+      JsonParser.parse(file)
+    }
   }
 
-  "The yaml swagger parser" should "read swagger yaml specifications" in {
-    fixtures.filter(_.getName.endsWith(".yaml")).map(YamlParser.parse)
+  fixtures.filter(_.getName.endsWith(".yaml")).foreach { file =>
+    "The yaml swagger parser" should s"read the ${file.getName} specification" in {
+      YamlParser.parse(file)
+    }
   }
 }

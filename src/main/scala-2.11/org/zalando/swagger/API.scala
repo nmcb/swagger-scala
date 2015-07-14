@@ -24,6 +24,8 @@ case class Info(
 
 case class Path(
   get: Operation,
+  post: Operation,
+  put: Operation,
   parameters: List[Parameter]
 ) extends API
 
@@ -40,11 +42,15 @@ case class Operation(
 case class Parameter(
   name: String, 
   @JsonProperty("type") kind: String, 
+  schema: Schema,
   format: String, 
   description: String, 
   access: String, 
   in: String, 
-  required: Boolean
+  required: Boolean,
+  default: String,
+  minimum: String,
+  maximum: String
 ) extends API
 
 case class Response(
@@ -57,6 +63,7 @@ case class Schema(
   typename: String, 
   @JsonProperty("type") kind: String, 
   @JsonProperty("$ref") ref: String, 
+  title: String,
   format: String, 
   description: String, 
   required: List[String], 
