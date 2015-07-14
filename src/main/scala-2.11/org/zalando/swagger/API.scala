@@ -1,6 +1,8 @@
 package org.zalando.swagger
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.`type`.TypeReference
+import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 
 sealed trait API
 
@@ -8,7 +10,7 @@ case class Swagger(
   swagger: String,
   info: Info,
   host: String,
-  schemes: List[String],
+  @JsonScalaEnumeration(classOf[SchemeType]) schemes: List[Scheme.Value],
   basePath: String,
   consumes: List[String],
   produces: List[String],
@@ -17,6 +19,15 @@ case class Swagger(
   definitions: Map[String, Definition],
   securityDefinitions: Map[String, SecurityDefinition]
 ) extends API
+
+private[swagger] class SchemeType extends TypeReference[Scheme.type]
+case object Scheme extends Enumeration {
+  type Scheme = Value
+  val HTTP = Value("http")
+  val HTTPS = Value("https")
+  val WS = Value("ws")
+  val WSS = Value("wss")
+}
 
 case class Info(
   title: String, 
