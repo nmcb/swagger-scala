@@ -139,7 +139,7 @@ case class Schema(
 
 case class Header(
   description: String,
-  @JsonProperty("type") kind: String, // TODO should be enum
+  @JsonScalaEnumeration(classOf[HeaderTypeReference]) @JsonProperty("type") headerType: HeaderType.Value,
   format: String, 
   items: Items,
   collectionFormat: String,
@@ -157,6 +157,18 @@ case class Header(
   enum: List[String],
   multipleOf: Int
 ) extends API
+
+private[swagger] class HeaderTypeReference extends TypeReference[HeaderType.type]
+case object HeaderType extends Enumeration {
+  type HeaderType = Value
+  val STRING = Value("string")
+  val NUMBER = Value("number")
+  val INTEGER = Value("integer")
+  val BOOLEAN = Value("boolean")
+  val ARRAY = Value("array")
+}
+
+
 
 case class Items(
   @JsonProperty("type") kind: String, // TODO should be enum
