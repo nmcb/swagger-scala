@@ -10,14 +10,17 @@ case class Swagger(
   swagger: String,
   info: Info,
   host: String,
-  @JsonScalaEnumeration(classOf[SchemeType]) schemes: List[Scheme.Value],
   basePath: String,
+  @JsonScalaEnumeration(classOf[SchemeType]) schemes: List[Scheme.Value],
   consumes: List[String],
   produces: List[String],
   paths: Map[String, Path],
-  security: List[Map[String,List[String]]],
   definitions: Map[String, Definition],
-  securityDefinitions: Map[String, SecurityDefinition]
+  parameters: Map[String, Parameter],
+  responses: Map[String, Response],
+  securityDefinitions: Map[String, SecurityDefinition],
+  security: List[Map[String,List[String]]],
+  tags: List[Tag]
 ) extends API
 
 private[swagger] class SchemeType extends TypeReference[Scheme.type]
@@ -31,18 +34,18 @@ case object Scheme extends Enumeration {
 
 case class Info(
   title: String, 
-  description: String, 
-  version: String,
+  description: String,
   termsOfService: String,
   contact: Contact,
-  license: License
+  license: License,
+  version: String
 ) extends API
 
 case class Contact(
   name: String,
-  email: String,
-  url: String
-  ) extends API
+  url: String,
+  email: String
+) extends API
 
 case class License(
   name: String,
@@ -50,51 +53,79 @@ case class License(
 ) extends API
 
 case class Path(
+  @JsonProperty("$ref") ref: String,
   get: Operation,
-  post: Operation,
   put: Operation,
+  post: Operation,
   delete: Operation,
+  options: Operation,
+  head: Operation,
+  patch: Operation,
   parameters: List[Parameter]
 ) extends API
 
 case class Operation(
-  parameters: List[Parameter], 
-  tags: List[String], 
-  description: String, 
-  summary: String, 
-  operationId: String, 
-  extensions: Map[String, String], 
-  responses: Map[String, Response],
-  produces: List[String],
+  tags: List[String],
+  summary: String,
+  description: String,
+  externalDocs: ExternalDocumentation,
+  operationId: String,
   consumes: List[String],
+  produces: List[String],
+  parameters: List[Parameter], // TODO should be ParameterOrReference
+  responses: Map[String, Response], // TODO should be OperationResponses
+  @JsonScalaEnumeration(classOf[SchemeType]) schemes: List[Scheme.Value],
+  deprecated: Boolean,
   security: List[Map[String,List[String]]]
 ) extends API
 
+trait ParameterOrReference extends API
+
 case class Parameter(
   name: String,
-  @JsonProperty("type") kind: String,
-  @JsonProperty("$ref") ref: String,
-  schema: Schema,
-  format: String, 
-  description: String, 
-  access: String, 
-  in: String, 
+  in: String,
+  description: String,
   required: Boolean,
-  default: String,
-  minimum: String,
-  maximum: String,
+  // if in is "body"
+  schema: Schema,
+  // if in is any other value than body 
+  @JsonProperty("type") kind: String,
+  format: String,
+  allowEmptValue: Boolean,
   items: Items,
-  collectionFormat: String
-) extends API
+  collectionFormat: String,
+  default: String,
+  maximum: String,
+  exclusiveMaximum: Boolean,
+  minimum: String,
+  exclusiveMinimum: Boolean,
+  maxLength: Int,
+  minLength: Int,
+  pattern: String,
+  maxItems: Int,
+  minItems: Int,
+  uniqueItems: Boolean,
+  enum: List[String],
+  multipleOf: Int
+) extends ParameterOrReference
+
+case class Reference(
+  @JsonProperty("$ref") ref: String
+) extends ParameterOrReference
 
 case class Response(
   description: String, 
   schema: Schema, 
-  headers: Map[String, Header]
+  headers: Map[String, Header],
+  examples: Map[String, Any]
 ) extends API
 
 case class Schema(
-  typename: String, 
+  discriminator: String,
+  readOnly: Boolean,
+  xml: Xml,
+  externalDocs: ExternalDocumentation,
+  example: Any,
   @JsonProperty("type") kind: String, 
   @JsonProperty("$ref") ref: String, 
   title: String,
@@ -107,18 +138,45 @@ case class Schema(
 ) extends API
 
 case class Header(
-  typename: String, 
+  description: String,
+  @JsonProperty("type") kind: String, // TODO should be enum
   format: String, 
-  description: String, 
-  items: Items
+  items: Items,
+  collectionFormat: String,
+  default: String,
+  maximum: Int,
+  exclusiveMaximum: Boolean,
+  minimum: Int,
+  exclusiveMinimum: Boolean,
+  maxLength: Int,
+  minLength: Int,
+  pattern: String,
+  maxItems: Int,
+  minItems: Int,
+  uniqueItems: Boolean,
+  enum: List[String],
+  multipleOf: Int
 ) extends API
 
 case class Items(
-  typename: String, 
+  @JsonProperty("type") kind: String, // TODO should be enum
   format: String, 
   items: Items,
   @JsonProperty("$ref") ref: String,
-  @JsonProperty("type") kind: String
+  collectionFormat: String,
+  default: String,
+  maximum: Int,
+  exclusiveMaximum: Int,
+  minimum: Int,
+  exclusiveMinimum: Int,
+  maxLength: Int,
+  minLength: Int,
+  pattern: String,
+  maxItems: Int,
+  minItems: Int,
+  uniqueItems: Boolean,
+  enum: List[String],
+  multipleOf: Int
 ) extends API
 
 case class Definition(
@@ -138,11 +196,30 @@ case class Property(
 
 case class SecurityDefinition(
   @JsonProperty("type") kind: String,
+  description: String,
+  name: String,
+  in: String,
+  flow: String,
+  authorizationUrl: String,
+  tokenUrl: String,
+  scopes: Map[String,String]
+) extends API
+
+case class Tag(
   name: String,
   description: String,
-  in: String,
-  authorizationUrl: String,
-  flow: String,
-  scopes: Map[String,String],
-  tokenUrl: String
+  externalDocs: ExternalDocumentation
+) extends API
+
+case class ExternalDocumentation(
+  description: String,
+  url: String
+) extends API
+
+case class Xml(
+  name: String,
+  namespace: String,
+  prefix: String,
+  attribute: Boolean,
+  wrapped: Boolean
 ) extends API
