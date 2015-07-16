@@ -29,7 +29,7 @@ paths:
         - application/xml
         - text/xml
         - text/html
-      items:
+      parameters:
         - name: tags
           in: query
           description: tags to filter by

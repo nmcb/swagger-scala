@@ -237,7 +237,7 @@ case class Xml(
   wrapped: Boolean
   ) extends API
 
-class VendorExtensions {self =>
+class VendorExtensions { self =>
   private[this] val extensions = new mutable.HashMap[String, String]
 
   @JsonAnySetter
